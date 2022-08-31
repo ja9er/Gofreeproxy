@@ -3,15 +3,17 @@ package main
 import (
 	"Gofreeproxy/fofa"
 	"Gofreeproxy/queue"
+	"compress/gzip"
 	"crypto/tls"
 	"fmt"
 	"github.com/gookit/color"
+	"golang.org/x/net/proxy"
 	"io"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
-	"net/url"
+	"strings"
 	"sync"
 	"time"
 )
@@ -19,7 +21,7 @@ import (
 func changesocks(ws *net.TCPConn) {
 	defer ws.Close()
 	//socks, err := net.Dial("tcp", "221.217.53.107:1080")
-	socks, err := net.Dial("tcp", "47.74.70.193:45554")
+	socks, err := net.Dial("tcp", "60.190.195.146:1080")
 	if err != nil {
 		log.Println("dial socks error:", err)
 		return
@@ -48,44 +50,94 @@ func strartsocks() {
 	}
 }
 func sockslivecheck(SocksProxy string, client *http.Client, req *http.Request) bool {
-	url_i := url.URL{}
-	url_proxy, _ := url_i.Parse("socks://" + SocksProxy)
+	dialer, err := proxy.SOCKS5("tcp", SocksProxy, nil, proxy.Direct)
+	if err != nil {
+		log.Println("can't connect to the proxy:", err)
+		_, err2 := proxy.SOCKS5("udp", SocksProxy, nil, proxy.Direct)
+		if err2 == nil {
+			log.Println("[+]udp proxy:", err)
+			return false
+		}
+		return false
+	}
 	tr := &http.Transport{
 		//关闭证书验证
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		//设置超时
 		Dial: (&net.Dialer{
-			Timeout:   10 * time.Second,
+			Timeout:   5 * time.Second,
 			KeepAlive: 10 * time.Second,
 		}).Dial,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ResponseHeaderTimeout: 10 * time.Second,
 		ExpectContinueTimeout: 10 * time.Second,
 		//设置代理
-		Proxy: http.ProxyURL(url_proxy),
+
 	}
+	tr.Dial = dialer.Dial
 	client.Transport = tr
 	resp, err := client.Do(req)
 	if err != nil {
 		return false
 	}
 	defer resp.Body.Close()
-	result, _ := ioutil.ReadAll(resp.Body)
+	reader := resp.Body
+	if resp.Header.Get("Content-Encoding") == "gzip" {
+		reader, err = gzip.NewReader(resp.Body)
+		if err != nil {
+			return false
+		}
+	}
+	result, err := ioutil.ReadAll(reader)
 	httpbody := string(result)
-	if len(httpbody) > 10 && resp.StatusCode == 200 {
+	if strings.Contains(httpbody, "当前 IP") {
+		fmt.Printf("[+]%s,使用代理:%s\r", httpbody, SocksProxy)
 		return true
 	}
 	return false
 
 }
-
 func startgetsocks() {
 	keys := "protocol=\"socks5\" && \"Method:No Authentication(0x00)\" && port=\"1080\""
 	GETRES := fofa.Fafaall(keys)
 	color.RGBStyleFromString("237,64,35").Printf("[+]从fofa获取代理:%d条", len(GETRES))
 	color.RGBStyleFromString("244,211,49").Println("\r\n[+]开始存活性检测")
-	pool := queue.New(100)
+	pool := queue.New(200)
 	var liveres []string
+	client := &http.Client{
+		//禁止重定向
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+	req, _ := http.NewRequest("GET", "http://myip.ipip.net", nil)
+	req.Header.Add("Cache-Control", "max-age=0")
+	req.Header.Add("Upgrade-Insecure-Requests", "1")
+	req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0")
+	req.Header.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
+	req.Header.Add("Accept-Encoding", "gzip, deflate")
+	currentdata := 0
+	tempsocks := ""
+	for i := 0; i < len(GETRES); i++ {
+		pool.Add(1)
+		tempsocks = GETRES[i]
+		go func(tempsocks string) {
+			flag := sockslivecheck(tempsocks, client, req)
+			if flag == true {
+				liveres = append(liveres, tempsocks)
+			}
+			currentdata = currentdata + 1
+			pool.Done()
+			fmt.Printf("[+]已检测%.2f%%,当前检测IP:%s,当前检测完成总数：%d\r", float32(currentdata*100)/float32(len(GETRES)), tempsocks, currentdata)
+		}(tempsocks)
+	}
+
+	pool.Wait()
+	color.RGBStyleFromString("237,64,35").Printf("[+]一共获取存活代理:%d条", len(liveres))
+	fmt.Println(liveres)
+}
+
+func test(socksproxy string) {
 	client := &http.Client{
 		//禁止重定向
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -98,27 +150,13 @@ func startgetsocks() {
 	req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0")
 	req.Header.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
 	req.Header.Add("Accept-Encoding", "gzip, deflate")
-	for i := 0; i < len(GETRES); i++ {
-		pool.Add(1)
-		tempsocks := GETRES[i]
-		go func(tempsocks string) {
-			flag := sockslivecheck(tempsocks, client, req)
-			if flag == true {
-				fmt.Printf("[+]已检测%.2f%%,存活检测成功:%s\r", float32(i)/float32(len(GETRES)), GETRES[i-1])
-				liveres = append(liveres, GETRES[i-1])
-			} else {
-				fmt.Printf("[-]已检测%.2f%%,存活检测失败:%s\r", float32(i)/float32(len(GETRES)), GETRES[i-1])
-			}
-			pool.Done()
-		}(tempsocks)
-	}
-	pool.Wait()
-	color.RGBStyleFromString("237,64,35").Printf("[+]一共获取存活代理:%d条", len(liveres))
-	fmt.Println(liveres)
+	flag := sockslivecheck(socksproxy, client, req)
+	fmt.Println(flag)
 }
+
 func main() {
 	startgetsocks()
 	//strartsocks()
-	//falg:=sockslivecheck("171.214.198.59:1080")
-	//fmt.Println(falg)
+	//test("127.0.0.1:7890")
+
 }
