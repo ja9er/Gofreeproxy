@@ -125,7 +125,7 @@ func Fafaall(keyword string) (urls []string) {
 		urls = append(urls, value[1])
 	}
 	if pagelength > 1 {
-		for i := 2; i <= pagelength || i <= 10; i++ {
+		for i := 2; i <= pagelength && i <= 1; i++ {
 			url = fofa_api(keyword, fofa.Email, fofa.Fofa_token, i, 1000)
 			res = fofahttp(url, fofa.Fofa_timeout)
 			if len(res.Results) > 0 {
