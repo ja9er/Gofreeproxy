@@ -26,11 +26,6 @@ func main() {
 		console.Strartsocks()
 	} else {
 		flag.Usage()
-		//console.Test("39.105.138.223:1080")
 		fmt.Println("请输入参数")
 	}
-	//startgetsocks()
-	//strartsocks()
-	//test("127.0.0.1:7890")
-
 }

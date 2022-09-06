@@ -42,10 +42,11 @@ func Test(socksproxy string) {
 
 func changesocks(ws *net.TCPConn) {
 	socksproxy := liveres[rand.Intn(len(liveres))]
-	fmt.Printf("\033[1;31m[+]当前使用代理%s\r", socksproxy)
+	fmt.Printf("\r\033[1;31m[+]当前使用代理%s\r", socksproxy)
 	defer ws.Close()
 	//socks, err := net.Dial("tcp", "221.217.53.107:1080")
-	socks, err := net.Dial("tcp", socksproxy)
+	socks, err := net.DialTimeout("tcp", socksproxy, 5*time.Second)
+	//socks, err := net.Dial("tcp", socksproxy)
 	if err != nil {
 		log.Println("dial socks error:", err)
 		changesocks(ws)
