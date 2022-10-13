@@ -138,5 +138,5 @@ func Fafaall(keyword string) (urls []string) {
 		}
 	}
 
-	return
+	return urls
 }
