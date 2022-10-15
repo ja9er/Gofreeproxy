@@ -17,6 +17,8 @@ usage:
 修改(bug)日志:
 >1.增加了自定义并发数量以及代理存活验证时间 \
 2.优化了控制台显示 \
-3.修复了从fofa获取代理卡在98%的问题,大概是因为超时机制没生效导致卡顿
+3.修复了从fofa获取代理卡在98%的问题,大概是因为超时机制没生效导致卡顿 \
+4.修复了mac下无法读取config.ini以及无法写入proxy.txt的问题 [[fix issues#2]](https://github.com/ja9er/Gofreeproxy/issues/2)
 
 ![](image/proxyissus.png)
+
