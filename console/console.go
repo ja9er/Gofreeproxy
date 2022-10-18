@@ -15,6 +15,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -56,9 +57,24 @@ func Strartsocks() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cmd := exec.Command("cmd", "/c", "cls")
-	cmd.Stdout = os.Stdout
-	cmd.Run()
+	optSys := runtime.GOOS
+	if strings.Contains(optSys, "linux") {
+		//执行clear指令清除控制台
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		err = cmd.Run()
+		if err != nil {
+			log.Println("cmd:", err)
+		}
+	} else {
+		//执行clear指令清除控制台
+		cmd := exec.Command("cmd", "/c", "cls")
+		cmd.Stdout = os.Stdout
+		err = cmd.Run()
+		if err != nil {
+			log.Println("cmd:", err)
+		}
+	}
 	color.RGBStyleFromString("237,64,35").Printf("[+]一共获取存活代理:%d条\r\n", len(liveres))
 	color.RGBStyleFromString("237,64,35").Println("[+]开始监听socks端口: 127.0.0.1:1080")
 
@@ -89,7 +105,7 @@ func IsProxy(proxyIp string, Time int) (isProxy bool) {
 		if res.StatusCode == 200 {
 			body, err := ioutil.ReadAll(res.Body)
 			if err == nil && strings.Contains(string(body), "当前 IP") {
-				fmt.Printf("[+]%s\r", string(body))
+				fmt.Printf("\u001B[2K\r[+]%s", string(body))
 				return true
 			} else {
 				return false
@@ -119,7 +135,7 @@ func Startgetsocks(Coroutine int, Time int) {
 			}
 			currentdata = currentdata + 1
 			pool.Done()
-			fmt.Printf("[+]已检测%.2f%%,当前检测IP为:%s\r", float32(currentdata*100)/float32(len(GETRES)), tempsocks+"\r")
+			fmt.Printf("\u001B[2K\r[+]已检测%.2f%%,当前检测IP为:%s", float32(currentdata*100)/float32(len(GETRES)), tempsocks)
 		}(tempsocks)
 
 	}
@@ -163,7 +179,7 @@ func Readfileproxy(Coroutine int, Time int) {
 			}
 			currentdata = currentdata + 1
 			pool.Done()
-			fmt.Printf("[+]已检测%.2f%%，%s", float32(currentdata*100)/float32(len(fileproxy)), "当前检测IP:"+tempsocks+"\r")
+			fmt.Printf("\u001B[2K\r[+]已检测%.2f%%，%s", float32(currentdata*100)/float32(len(fileproxy)), "当前检测IP:"+tempsocks)
 		}(tempsocks)
 
 	}
