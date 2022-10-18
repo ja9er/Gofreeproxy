@@ -1,4 +1,4 @@
-# Gofreeproxy ![](https://img.shields.io/badge/%E8%AF%AD%E8%A8%80-golang-brightgreen) ![GitHub Repo stars](https://img.shields.io/github/stars/ja9er/Gofreeproxy)
+# Gofreeproxy ![](https://img.shields.io/badge/%E8%AF%AD%E8%A8%80-golang-brightgreen)![](https://img.shields.io/github/downloads/ja9er/Gofreeproxy/total) ![GitHub Repo stars](https://img.shields.io/github/stars/ja9er/Gofreeproxy)
 白嫖党YES!
 
 配置好config.ini中关于fofa的参数\
