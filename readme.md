@@ -12,7 +12,7 @@ usage:
 效果:
 ![](image/img.png)
 
-![](image/goproxy.gif)
+![](image/use.gif)
 
 修改(bug)日志:
 >1.增加了自定义并发数量以及代理存活验证时间 \
