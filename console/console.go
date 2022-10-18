@@ -174,7 +174,7 @@ func Readfileproxy(Coroutine int, Time int) {
 }
 func Writeproxytxt(livesocks []string) (flag bool) {
 	// 指定模式打开文件  追加 文件不存在则创建
-	file, err := os.OpenFile("proxy.txt", os.O_TRUNC|os.O_CREATE, os.ModePerm)
+	file, err := os.OpenFile("proxy.txt", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	// 打开异常检测
 	if err != nil {
 		fmt.Printf("open file failed, err: %v\n", err)
