@@ -25,7 +25,7 @@ var liveres []string
 
 func changesocks(ws *net.TCPConn) {
 	socksproxy := liveres[rand.Intn(len(liveres))]
-	color.RGBStyleFromString("249,134,134").Printf(fmt.Sprintf("[+]当前使用代理%s\r", socksproxy))
+	color.RGBStyleFromString("249,134,134").Printf(fmt.Sprintf("\u001B[2K\r[+]当前使用代理%s", socksproxy))
 	defer ws.Close()
 	//socks, err := net.Dial("tcp", "221.217.53.107:1080")
 	socks, err := net.DialTimeout("tcp", socksproxy, 5*time.Second)
