@@ -118,7 +118,7 @@ func IsProxy(proxyIp string, Time int) (isProxy bool) {
 
 func Startgetsocks(Coroutine int, Time int) {
 	// protocol="socks5" && "Method:No Authentication(0x00)" && country!="CN" 
-	// 排除国内IP
+	// fofa 排除国内IP
 	// keys := "protocol=\"socks5\" && \"Method:No Authentication(0x00)\""
 	keys := "protocol=\"socks5\" && \"Method:No Authentication(0x00)\" && country!=\"CN\" "
 	GETRES := fofa.Fafaall(keys)
