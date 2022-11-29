@@ -66,7 +66,6 @@ func Strartsocks() {
 		if err != nil {
 			log.Println("cmd:", err)
 		}
-		
 	} else {
 		//执行clear指令清除控制台
 		cmd := exec.Command("clear")
