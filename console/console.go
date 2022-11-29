@@ -58,17 +58,18 @@ func Strartsocks() {
 		log.Fatal(err)
 	}
 	optSys := runtime.GOOS
-	if strings.Contains(optSys, "linux") {
+	if strings.Contains(optSys, "windows") {
 		//执行clear指令清除控制台
-		cmd := exec.Command("clear")
+		cmd := exec.Command("cmd", "/c", "cls")
 		cmd.Stdout = os.Stdout
 		err = cmd.Run()
 		if err != nil {
 			log.Println("cmd:", err)
 		}
+		
 	} else {
 		//执行clear指令清除控制台
-		cmd := exec.Command("cmd", "/c", "cls")
+		cmd := exec.Command("clear")
 		cmd.Stdout = os.Stdout
 		err = cmd.Run()
 		if err != nil {
