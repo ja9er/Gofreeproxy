@@ -120,7 +120,7 @@ func Startgetsocks(Coroutine int, Time int) {
 	// protocol="socks5" && "Method:No Authentication(0x00)" && country!="CN" 
 	// fofa 排除国内IP
 	// keys := "protocol=\"socks5\" && \"Method:No Authentication(0x00)\""
-	keys := "protocol=\"socks5\" && \"Method:No Authentication(0x00)\" && country!=\"CN\" "
+	keys := "protocol=\"socks5\" && \"Method:No Authentication(0x00)\" && country!=\"CN\""
 	GETRES := fofa.Fafaall(keys)
 	color.RGBStyleFromString("237,64,35").Printf("[+]从fofa获取代理:%d条", len(GETRES))
 	color.RGBStyleFromString("244,211,49").Println("\r\n[+]开始存活性检测")
