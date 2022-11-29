@@ -9,6 +9,11 @@ usage:
 > -t    使用-t参数可设置验证代理的超时时间，默认为10秒\
 > 成功后socks代理监听1080端口即可
 
+修改Fofa 搜索语法，排除国内代理。
+```
+protocol="socks5" && "Method:No Authentication(0x00)" && country!="CN"
+```
+
 效果:
 ![](image/img.png)
 
