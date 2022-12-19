@@ -79,7 +79,10 @@ func Strartsocks() {
 	color.RGBStyleFromString("237,64,35").Println("[+]开始监听socks端口: 127.0.0.1:1080")
 
 	for {
-		conn, _ := listener.Accept()
+		conn, err := listener.Accept()
+		if err != nil {
+			continue
+		}
 		go changesocks(conn.(*net.TCPConn))
 	}
 }
