@@ -51,67 +51,43 @@ func GetConfig() Config {
 	//创建一个结构体变量的反射
 	cr := reflect.ValueOf(c).Elem()
 	//打开文件io流
-	sysType := runtime.GOOS
-	if sysType == "windows" {
-		f, err := os.Open(GetCurrentAbPathByExecutable() + "\\config.ini")
-		if err != nil {
-			//log.Fatal(err)
-			color.RGBStyleFromString("237,64,35").Println("[Error] Fofa configuration file error!!!")
-			os.Exit(1)
-		}
-		defer func() {
-			if err = f.Close(); err != nil {
-				log.Fatal(err)
-			}
-		}()
-		//我们要逐行读取文件内容
-		s := bufio.NewScanner(f)
-		for s.Scan() {
-			//以=分割,前面为key,后面为value
-			var str = s.Text()
-			var index = strings.Index(str, "=")
-			var key = str[0:index]
-			var value = str[index+1:]
-			//通过反射将字段设置进去
-			cr.FieldByName(key).Set(reflect.ValueOf(value))
-		}
-		err = s.Err()
-		if err != nil {
-			log.Fatal(err)
-		}
-		//返回Config结构体变量
-		return *c
+	optSys := runtime.GOOS
+	path := ""
+	if optSys == "windows" {
+		path = GetCurrentAbPathByExecutable() + "\\config.ini"
 	} else {
-		f, err := os.Open(GetCurrentAbPathByExecutable() + "/config.ini")
-		if err != nil {
-			//log.Fatal(err)
-			color.RGBStyleFromString("237,64,35").Println("[Error] Fofa configuration file error!!!")
-			os.Exit(1)
-		}
-		defer func() {
-			if err = f.Close(); err != nil {
-				log.Fatal(err)
-			}
-		}()
-		//我们要逐行读取文件内容
-		s := bufio.NewScanner(f)
-		for s.Scan() {
-			//以=分割,前面为key,后面为value
-			var str = s.Text()
-			var index = strings.Index(str, "=")
-			var key = str[0:index]
-			var value = str[index+1:]
-			//通过反射将字段设置进去
-			cr.FieldByName(key).Set(reflect.ValueOf(value))
-		}
-		err = s.Err()
-		if err != nil {
+		path = GetCurrentAbPathByExecutable() + "/config.ini"
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		//log.Fatal(err)
+		color.RGBStyleFromString("244,211,49").Println("[Error] Fofa configuration file error!!!")
+		os.Exit(1)
+	}
+	defer func() {
+		if err = f.Close(); err != nil {
 			log.Fatal(err)
 		}
-		//返回Config结构体变量
-		return *c
+	}()
+	//我们要逐行读取文件内容
+	s := bufio.NewScanner(f)
+	for s.Scan() {
+		//以=分割,前面为key,后面为value
+		var str = s.Text()
+		var index = strings.Index(str, "=")
+		var key = str[0:index]
+		var value = str[index+1:]
+		//通过反射将字段设置进去
+		cr.FieldByName(key).Set(reflect.ValueOf(value))
 	}
+	err = s.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+	//返回Config结构体变量
+	return *c
 }
+
 
 func fofa_api(keyword string, email string, key string, page int, size int) string {
 	input := []byte(keyword)
