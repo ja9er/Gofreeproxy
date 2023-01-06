@@ -1,6 +1,7 @@
 # Gofreeproxy ![](https://img.shields.io/badge/%E8%AF%AD%E8%A8%80-golang-brightgreen)![](https://img.shields.io/github/downloads/ja9er/Gofreeproxy/total) ![GitHub Repo stars](https://img.shields.io/github/stars/ja9er/Gofreeproxy)
 
-##
+## 
+[![Stargazers over time](https://starchart.cc/ja9er/Gofreeproxy.svg)](https://starchart.cc/ja9er/Gofreeproxy)
 
 配置好config.ini中关于fofa的参数\
 usage:
@@ -22,6 +23,3 @@ usage:
 4.修复了mac下无法读取config.ini以及无法写入proxy.txt的问题 [[fix issues#2]](https://github.com/ja9er/Gofreeproxy/issues/2)\
 5.优化控制台显示，修复了覆盖字符串未完全的bug\
 ![](image/proxyissus.png)
-
-## :)
-[![Stargazers over time](https://starchart.cc/ja9er/Gofreeproxy.svg)](https://starchart.cc/ja9er/Gofreeproxy)
