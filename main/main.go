@@ -23,7 +23,7 @@ func main() {
 	flag.BoolVar(&Fofa, "fofa", false, "\n使用-fofa参数可从fofa收集资产获取公开代理使用")
 	flag.BoolVar(&Hunter, "hunter", false, "\n使用-hunter参数可从fofa收集资产获取公开代理使用")
 	flag.BoolVar(&Quake, "quake", false, "\n使用-quake参数可从hunter收集资产获取公开代理使用")
-	flag.BoolVar(&Renew, "renew", false, "\n当启用-fofa或-quake或-hunter参数时是否对现用proxy.txt进行重写，默认为否")
+	flag.BoolVar(&Renew, "renew", false, "\n当启用-fofa或-quake或-hunter参数时是否对现有proxy.txt进行重写，默认为否")
 	flag.BoolVar(&File, "f", false, "\n使用-f参数可读取当前目录下的proxy.txt，获取其中的代理使用")
 	flag.StringVar(&Port, "p", "1080", "\n使用-p参数自定义本地服务端口，默认为1080")
 	flag.IntVar(&Coroutine, "c", 200, "\n使用-c参数可设置验证代理的协程数量，默认为200")
