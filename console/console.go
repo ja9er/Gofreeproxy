@@ -2,12 +2,13 @@ package console
 
 import (
 	"Gofreeproxy/fofa"
+	"Gofreeproxy/hunter"
+	"Gofreeproxy/quake"
 	"Gofreeproxy/queue"
 	"bufio"
 	"fmt"
 	"github.com/gookit/color"
 	"io"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net"
@@ -16,6 +17,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -52,8 +54,21 @@ func changesocks(ws *net.TCPConn) {
 	wg.Wait()
 }
 
-func Strartsocks() {
-	listener, err := net.Listen("tcp", "127.0.0.1:1080")
+func RemoveDuplicates(arr []string) []string {
+	encountered := map[string]bool{} // 用于记录已经遇到的元素
+	result := []string{}             // 存储去重后的结果
+
+	for _, value := range arr {
+		if !encountered[value] {
+			encountered[value] = true
+			result = append(result, value)
+		}
+	}
+
+	return result
+}
+func Strartsocks(port string) {
+	listener, err := net.Listen("tcp", "127.0.0.1:"+port)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,7 +91,7 @@ func Strartsocks() {
 		}
 	}
 	color.RGBStyleFromString("237,64,35").Printf("[+]一共获取存活代理:%d条\r\n", len(liveres))
-	color.RGBStyleFromString("237,64,35").Println("[+]开始监听socks端口: 127.0.0.1:1080")
+	color.RGBStyleFromString("237,64,35").Println("[+]开始监听socks端口: 127.0.0.1:" + port)
 
 	for {
 		conn, err := listener.Accept()
@@ -106,7 +121,7 @@ func IsProxy(proxyIp string, Time int) (isProxy bool) {
 	} else {
 		defer res.Body.Close()
 		if res.StatusCode == 200 {
-			body, err := ioutil.ReadAll(res.Body)
+			body, err := io.ReadAll(res.Body)
 			if err == nil && strings.Contains(string(body), "当前 IP") {
 				fmt.Printf("\u001B[2K\r[+]%s", string(body))
 				return true
@@ -119,11 +134,28 @@ func IsProxy(proxyIp string, Time int) (isProxy bool) {
 	}
 }
 
-func Startgetsocks(Coroutine int, Time int) {
-	keys := "protocol=\"socks5\" && \"Method:No Authentication(0x00)\""
-	GETRES := fofa.Fafaall(keys)
-	color.RGBStyleFromString("237,64,35").Printf("[+]从fofa获取代理:%d条", len(GETRES))
+func Startgetsocks(Coroutine int, Time int, useFofa bool, useQuake bool, useHunter bool, renew bool) {
+	GETRES := []string{}
+	if useFofa {
+		fofakeys := "protocol=\"socks5\" && \"Method:No Authentication(0x00)\""
+		FOFA := fofa.Fafaall(fofakeys)
+		GETRES = append(GETRES, FOFA...)
+		color.RGBStyleFromString("237,64,35").Printf("[+]从fofa获取代理:%d条", len(FOFA))
+	}
+	if useQuake {
+		quakekeys := "service:\"socks5\" and response:\"Accepted Auth Method: 0x0\""
+		QUAKE := quake.Quakeall(quakekeys)
+		GETRES = append(GETRES, QUAKE...)
+		color.RGBStyleFromString("237,64,35").Printf("[+]从hunter获取代理:%d条", len(QUAKE))
+	}
+	if useHunter {
+		hunterkeys := "protocol==\"socks5\"&&protocol.banner=\"Method: 0x00 (No authentication)\""
+		HUNTER := hunter.Hunterall(hunterkeys)
+		GETRES = append(GETRES, HUNTER...)
+		color.RGBStyleFromString("237,64,35").Printf("[+]从hunter获取代理:%d条", len(HUNTER))
+	}
 	color.RGBStyleFromString("244,211,49").Println("\r\n[+]开始存活性检测")
+	GETRES = RemoveDuplicates(GETRES)
 	pool := queue.New(Coroutine)
 	currentdata := 0
 	tempsocks := ""
@@ -144,7 +176,8 @@ func Startgetsocks(Coroutine int, Time int) {
 	}
 
 	pool.Wait()
-	Writeproxytxt(liveres)
+	fmt.Println("总共获取到代理地址：" + strconv.Itoa(len(GETRES)))
+	Writeproxytxt(liveres, renew)
 }
 
 func Readfileproxy(Coroutine int, Time int) {
@@ -167,6 +200,7 @@ func Readfileproxy(Coroutine int, Time int) {
 		}
 		fileproxy = append(fileproxy, line)
 	}
+	fileproxy = RemoveDuplicates(fileproxy)
 	pool := queue.New(Coroutine)
 	currentdata := 0
 	tempsocks := ""
@@ -191,9 +225,16 @@ func Readfileproxy(Coroutine int, Time int) {
 	color.RGBStyleFromString("237,64,35").Printf("[+]一共获取存活代理:%d条", len(liveres))
 	fmt.Println(liveres)
 }
-func Writeproxytxt(livesocks []string) (flag bool) {
+func Writeproxytxt(livesocks []string, renew bool) (flag bool) {
+	var file *os.File
+	var err error
+	if renew {
+		file, err = os.OpenFile("proxy.txt", os.O_WRONLY|os.O_CREATE, 0666)
+	} else {
+		file, err = os.OpenFile("proxy.txt", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	}
 	// 指定模式打开文件  追加 文件不存在则创建
-	file, err := os.OpenFile("proxy.txt", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+
 	// 打开异常检测
 	if err != nil {
 		fmt.Printf("open file failed, err: %v\n", err)
