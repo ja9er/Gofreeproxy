@@ -1,78 +1,28 @@
-name: Build and Release
-
+name: Release
 on:
-  push:
-    branches:
-      - master
+  create:
+    tags:
+      - "*" 
 
-jobs:
-  build:
+jobs: 
+  release: 
     runs-on: ubuntu-latest
-
-    steps:
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 1.2.2
-          
-
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Build for Windows
-        working-directory: ./
-        run: GOOS=windows GOARCH=amd64 go build -o gofreeproxy-windows-amd64.exe main/main.go
-
-      - name: Build for Linux
-        working-directory: ./
-        run: GOOS=linux GOARCH=amd64 go build -o gofreeproxy-linux-amd64
-
-      - name: Build for macOS
-        working-directory: ./
-        run: GOOS=darwin GOARCH=amd64 go build -o gofreeproxy-darwin-amd64
-      - name: Zip binaries
-        run: |
-          zip gofreeproxy-windows-amd64.zip gofreeproxy-windows-amd64.exe
-          zip gofreeproxy-linux-amd64.zip gofreeproxy-linux-amd64
-          zip gofreeproxy-darwin-amd64.zip gofreeproxy-darwin-amd64
-
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
-
-      - name: Upload Windows binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./gofreeproxy-windows-amd64.zip
-          asset_name: gofreeproxy-windows-amd64.zip
-          asset_content_type: application/zip
-
-      - name: Upload Linux binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./gofreeproxy-linux-amd64.zip
-          asset_name: gofreeproxy-linux-amd64.zip
-          asset_content_type: application/zip
-
-      - name: Upload macOS binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./gofreeproxy-darwin-amd64.zip
-          asset_name: gofreeproxy-darwin-amd64.zip
-          asset_content_type: application/zip
+    steps: 
+      - 
+        name: "Check out code"
+        uses: actions/checkout@v2
+        with: 
+          fetch-depth: 0
+      - 
+        name: "Set up Go"
+        uses: actions/setup-go@v2
+        with: 
+          go-version: 1.17
+      - 
+        env: 
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        name: "Create release on GitHub"
+        uses: goreleaser/goreleaser-action@v2
+        with: 
+          args: "release --rm-dist"
+          version: latest
