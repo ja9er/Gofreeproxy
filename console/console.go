@@ -67,8 +67,8 @@ func RemoveDuplicates(arr []string) []string {
 
 	return result
 }
-func Strartsocks(port string) {
-	listener, err := net.Listen("tcp", "127.0.0.1:"+port)
+func Strartsocks(port, host string) {
+	listener, err := net.Listen("tcp", host+":"+port)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -91,7 +91,7 @@ func Strartsocks(port string) {
 		}
 	}
 	color.RGBStyleFromString("237,64,35").Printf("[+]一共获取存活代理:%d条\r\n", len(liveres))
-	color.RGBStyleFromString("237,64,35").Println("[+]开始监听socks端口: 127.0.0.1:" + port)
+	color.RGBStyleFromString("237,64,35").Println("[+]开始监听socks端口: " + host + ":" + port)
 
 	for {
 		conn, err := listener.Accept()
