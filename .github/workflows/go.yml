@@ -20,12 +20,15 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build for Windows
+        working-directory: ./
         run: GOOS=windows GOARCH=amd64 go build -o gofreeproxy-windows-amd64.exe main/main.go
 
       - name: Build for Linux
+        working-directory: ./
         run: GOOS=linux GOARCH=amd64 go build -o gofreeproxy-linux-amd64
 
       - name: Build for macOS
+        working-directory: ./
         run: GOOS=darwin GOARCH=amd64 go build -o gofreeproxy-darwin-amd64
       - name: Zip binaries
         run: |
