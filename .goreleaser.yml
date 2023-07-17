@@ -1,6 +1,6 @@
 builds:
-    - binary: pocV
-      main: ./cmd/pocV/
+    - binary: gofreeproxy
+      main: ./main/
       goos:
         - linux
         - windows
