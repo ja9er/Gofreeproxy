@@ -24,13 +24,13 @@ jobs:
         run: ls
 
       - name: Build for Windows
-        run: GOOS=windows GOARCH=amd64 go build -o gofreeproxy-windows-amd64.exe -v ./main/
+        run: GOOS=windows GOARCH=amd64 go build -o gofreeproxy-windows-amd64.exe
 
       - name: Build for Linux
-        run: GOOS=linux GOARCH=amd64 go build -o gofreeproxy-linux-amd64 -v ./main/
+        run: GOOS=linux GOARCH=amd64 go build -o gofreeproxy-linux-amd64
 
       - name: Build for macOS
-        run: GOOS=darwin GOARCH=amd64 go build -o gofreeproxy-darwin-amd64 -v ./main/
+        run: GOOS=darwin GOARCH=amd64 go build -o gofreeproxy-darwin-amd64
       - name: Zip binaries
         run: |
           zip gofreeproxy-windows-amd64.zip gofreeproxy-windows-amd64.exe
