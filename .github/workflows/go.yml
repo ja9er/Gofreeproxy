@@ -14,10 +14,14 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: 1.2.2
+          path: ./
           
 
       - name: Checkout code
         uses: actions/checkout@v3
+        
+      - name: Testpwd
+        run: pwd
 
       - name: Build for Windows
         run: GOOS=windows GOARCH=amd64 go build -o gofreeproxy-windows-amd64.exe -v ./main/
